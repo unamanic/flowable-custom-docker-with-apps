@@ -1,23 +1,37 @@
 version: '3.4'
 services:
   db:
-    image: mysql
+    image: postgres
     environment:
-      - MYSQL_ROOT_PASSWORD=password
-      - MYSQL_DATABASE=flowable
-      - MYSQL_USER=flowable
-      - MYSQL_PASSWORD=flowable
+      - POSTGRES_PASSWORD=flowable
+      - POSTGRES_USER=flowable
+      - POSTGRES_DB=flowable
+    ports:
+      - 15433:5432
     networks:
       - flow-app
-    ports:
-      - 13306:3306
+#  db:
+#    image: mysql
+#    environment:
+#      - MYSQL_ROOT_PASSWORD=password
+#      - MYSQL_DATABASE=flowable
+#      - MYSQL_USER=flowable
+#      - MYSQL_PASSWORD=flowable
+#    networks:
+#      - flow-app
+#    ports:
+#      - 13306:3306
 
   flowable-idm:
-#    image: flowable/flowable-idm:6.4.2.1
-    build: ./flowable-idm
+    image: flowable/flowable-idm:latest
+#    build: ./flowable-idm
     environment:
-      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver
-      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/flowable?characterEncoding=UTF-8
+      - SERVER_PORT=8080
+      - SERVER_SERVLET_CONTEXT_PATH=/
+      - SPRING_DATASOURCE_DRIVER-CLASS-NAME=org.postgresql.Driver
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/flowable
+#      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver
+#      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/flowable?characterEncoding=UTF-8
       - SPRING_DATASOURCE_USERNAME=flowable
       - SPRING_DATASOURCE_PASSWORD=flowable
       - FLOWABLE_IDM_APP_ADMIN_USER_ID=admin
@@ -34,15 +48,19 @@ services:
       - 18888:8080
     depends_on:
       - db
-    #    entrypoint: ["./wait-for-something.sh", "db", "5432", "Database", "java", "-jar", "/app.war"]
-    entrypoint: ["./wait-for-something.sh", "db", "3306", "Database", "catalina.sh", "run"]
+    entrypoint: ["./wait-for-something.sh", "db", "5432", "Database", "java", "-jar", "/app.war"]
+#    entrypoint: ["./wait-for-something.sh", "db", "3306", "Database", "catalina.sh", "run"]
 
   flowable-admin:
-#    image: flowable/flowable-admin:6.4.2.1
-    build: ./flowable-admin
+    image: flowable/flowable-admin:latest
+#    build: ./flowable-admin
     environment:
-      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver
-      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/flowable?characterEncoding=UTF-8
+      - SERVER_PORT=8080
+      - SERVER_SERVLET_CONTEXT_PATH=/
+      - SPRING_DATASOURCE_DRIVER-CLASS-NAME=org.postgresql.Driver
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/flowable
+#      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver
+#      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/flowable?characterEncoding=UTF-8
       - SPRING_DATASOURCE_USERNAME=flowable
       - SPRING_DATASOURCE_PASSWORD=flowable
       - FLOWABLE_COMMON_APP_IDM_URL=http://flowable-idm:8080/
@@ -92,16 +110,20 @@ services:
     depends_on:
       - db
       - flowable-idm
-#    entrypoint: ["./wait-for-something.sh", "db", "5432", "Database", "java", "-jar", "/app.war"]
-    entrypoint: ["./wait-for-something.sh", "db", "3306", "Database", "catalina.sh", "run"]
+    entrypoint: ["./wait-for-something.sh", "db", "5432", "Database", "java", "-jar", "/app.war"]
+#    entrypoint: ["./wait-for-something.sh", "db", "3306", "Database", "catalina.sh", "run"]
 
 
   flowable-modeler:
-#    image: flowable/flowable-admin:6.4.2.1
-    build: ./flowable-modeler
+    image: flowable/flowable-modeler:latest
+#    build: ./flowable-modeler
     environment:
-      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver
-      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/flowable?characterEncoding=UTF-8
+      - SERVER_PORT=8080
+      - SERVER_SERVLET_CONTEXT_PATH=/
+      - SPRING_DATASOURCE_DRIVER-CLASS-NAME=org.postgresql.Driver
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/flowable
+#      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver
+#      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/flowable?characterEncoding=UTF-8
       - SPRING_DATASOURCE_USERNAME=flowable
       - SPRING_DATASOURCE_PASSWORD=flowable
       - FLOWABLE_COMMON_APP_IDM_URL=http://flowable-idm:8080/
@@ -116,14 +138,42 @@ services:
     depends_on:
       - db
       - flowable-idm
-#    entrypoint: ["./wait-for-something.sh", "db", "5432", "Database", "java", "-jar", "/app.war"]
-    entrypoint: ["./wait-for-something.sh", "db", "3306", "Database", "catalina.sh", "run"]
+    entrypoint: ["./wait-for-something.sh", "db", "5432", "Database", "java", "-jar", "/app.war"]
+#    entrypoint: ["./wait-for-something.sh", "db", "3306", "Database", "catalina.sh", "run"]
+
+  flowable-task:
+    image: flowable/flowable-task:latest
+#    build: ./flowable-modeler
+    environment:
+      - SERVER_PORT=8080
+#      - SERVER_SERVLET_CONTEXT_PATH=/
+      - SPRING_DATASOURCE_DRIVER-CLASS-NAME=org.postgresql.Driver
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/flowable
+#      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver
+#      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/flowable?characterEncoding=UTF-8
+      - SPRING_DATASOURCE_USERNAME=flowable
+      - SPRING_DATASOURCE_PASSWORD=flowable
+      - FLOWABLE_COMMON_APP_IDM_URL=http://flowable-idm:8080/
+      - FLOWABLE_COMMON_APP_IDM_REDIRECT_URL=http://localhost:18888/
+      - FLOWABLE_COMMON_APP_IDM_ADMIN_USER=admin
+      - FLOWABLE_COMMON_APP_IDM_ADMIN_PASSWORD=test
+    networks:
+      - flow-app
+    ports:
+      - 18181:8080
+    depends_on:
+      - db
+      - flowable-idm
+    entrypoint: ["./wait-for-something.sh", "db", "5432", "Database", "java", "-jar", "/app.war"]
+#    entrypoint: ["./wait-for-something.sh", "db", "3306", "Database", "catalina.sh", "run"]
 
   flowable-boot-app:
     build: ./flowable-boot-app
     environment:
-      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver
-      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/flowable?characterEncoding=UTF-8
+      - SPRING_DATASOURCE_DRIVER-CLASS-NAME=org.postgresql.Driver
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/flowable
+#      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver
+#      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/flowable?characterEncoding=UTF-8
       - SPRING_DATASOURCE_USERNAME=flowable
       - SPRING_DATASOURCE_PASSWORD=flowable
       - FLOWABLE_COMMON_APP_IDM_URL=http://flowable-idm:8080/
@@ -136,7 +186,8 @@ services:
     depends_on:
       - db
       - flowable-idm
-    entrypoint: ["./wait-for-something.sh", "db", "3306", "Database", "java", "-jar", "/app.jar"]
+    entrypoint: ["./wait-for-something.sh", "db", "5432", "Database", "java", "-jar", "/app.jar"]
+#    entrypoint: ["./wait-for-something.sh", "db", "3306", "Database", "java", "-jar", "/app.jar"]
 
 networks:
   flow-app:
